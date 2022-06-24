@@ -7,11 +7,6 @@ on:
         description: Module ID.
         required: true
         type: string
-      extensions:
-        description: List of extensions to PHP.
-        default: curl, intl, pdo, pdo_mysql, zip, exif, fileinfo, mbstring, gd
-        required: false
-        type: string
       os:
         description: Os to test, separated by comma.
         default: >-
@@ -21,6 +16,11 @@ on:
       php:
         description: PHP versions to test, separated by comma.
         required: true
+        type: string
+      extensions:
+        description: List of extensions to PHP.
+        default: curl, intl, pdo, pdo_mysql, zip, exif, fileinfo, mbstring, gd
+        required: false
         type: string
       mysql:
         description: MySQL versions to test, separated by comma.
