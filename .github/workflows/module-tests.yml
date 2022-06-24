@@ -14,7 +14,8 @@ on:
         type: string
       os:
         description: Os to test, separated by comma.
-        default: ubuntu-latest
+        default: >-
+          ['ubuntu-latest']
         required: false
         type: string
       php:
@@ -23,12 +24,14 @@ on:
         type: string
       mysql:
         description: MySQL versions to test, separated by comma.
-        default: 5.7
+        default: >-
+          ['5.7']
         required: false
         type: string
       humhub-ref:
         description: HumHub core branches to test, separated by comma.
-        default: develop, master
+        default: >-
+          ['develop', 'master']
         required: false
         type: string
 
