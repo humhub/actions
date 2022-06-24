@@ -34,6 +34,16 @@ on:
           ['develop', 'master']
         required: false
         type: string
+      use-rest-module:
+        description: Activate REST API module for api tests.
+        default: false
+        required: false
+        type: boolean
+      install-composer:
+        description: Install composer dependencies for the current module.
+        default: false
+        required: false
+        type: boolean
 
 jobs:
   tests:
@@ -113,6 +123,18 @@ jobs:
       - name: Run installer
         run: php protected/humhub/tests/codeception/bin/yii installer/auto
 
+      - name: Checkout REST Module
+        if: ${{ inputs.use-rest-module }}
+        uses: actions/checkout@v2
+        with:
+          repository: 'humhub/rest'
+          ref: 'master'
+          path: 'protected/modules/rest'
+
+      - name: Activate REST Module
+        if: ${{ inputs.use-rest-module }}
+        run: php protected/humhub/tests/codeception/bin/yii module/enable rest
+
       - name: Rebuild search index
         run: php protected/humhub/tests/codeception/bin/yii search/rebuild
 
@@ -136,6 +158,12 @@ jobs:
 
       - name: Valdiate test server
         run: sleep 5 && curl --fail --head http://127.0.0.1:8080/index-test.php
+
+      - name: Install module dependencies
+        if: ${{ inputs.install-composer }}
+        run: |
+          cd $GITHUB_WORKSPACE/protected/modules/${{ env.module-id }}
+          composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
       - name: Run test suite
         run: |
