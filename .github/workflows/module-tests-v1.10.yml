@@ -1,0 +1,10 @@
+name: module-tests-v1.10
+
+jobs:
+  tests:
+    uses: humhub/actions/.github/workflows/module-tests.yml@main
+    with:
+      humhub-ref: >-
+        ['v1.10']
+      php: >-
+        ['7.3', '7.4', '8.0']

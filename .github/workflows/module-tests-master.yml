@@ -1,0 +1,10 @@
+name: module-tests-master
+
+jobs:
+  tests:
+    uses: humhub/actions/.github/workflows/module-tests.yml@main
+    with:
+      humhub-ref: >-
+        ['master']
+      php: >-
+        ['7.4', '8.0', '8.1']
