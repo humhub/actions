@@ -1,5 +1,13 @@
 name: module-tests-develop
 
+on:
+  workflow_call:
+    inputs:
+      module-id:
+        description: Module ID.
+        required: true
+        type: string
+
 jobs:
   tests:
     uses: humhub/actions/.github/workflows/module-tests.yml@main
