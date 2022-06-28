@@ -19,7 +19,7 @@ on:
         type: string
       extensions:
         description: List of extensions to PHP.
-        default: curl, intl, pdo, pdo_mysql, zip, exif, fileinfo, mbstring, gd
+        default: curl, intl, pdo, pdo_mysql, zip, exif, fileinfo, mbstring, gd, ldap
         required: false
         type: string
       mysql:
