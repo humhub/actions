@@ -1,0 +1,168 @@
+name: module-tests-v1.7
+
+on:
+  workflow_call:
+    inputs:
+      module-id:
+        description: Module ID.
+        required: true
+        type: string
+      os:
+        description: Os to test, separated by comma.
+        default: >-
+          ['ubuntu-latest']
+        required: false
+        type: string
+      php:
+        description: PHP versions to test, separated by comma.
+        default: >-
+          ['7.1', '7.2', '7.3', '7.4']
+        required: false
+        type: string
+      extensions:
+        description: List of extensions to PHP.
+        default: curl, intl, pdo, pdo_mysql, zip, exif, fileinfo, mbstring, gd, ldap
+        required: false
+        type: string
+      mysql:
+        description: MySQL versions to test, separated by comma.
+        default: >-
+          ['5.7']
+        required: false
+        type: string
+      use-rest-module:
+        description: Activate REST API module for api tests.
+        default: false
+        required: false
+        type: boolean
+      install-composer:
+        description: Install composer dependencies for the current module.
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }}-mysql-${{ matrix.mysql }}-humhub-v1.7
+    env:
+      module-id: ${{ inputs.module-id }}
+      extensions: ${{ inputs.extensions }}
+      key: cache-v1
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: ${{ fromJson(inputs.os) }}
+        php: ${{ fromJson(inputs.php) }}
+        mysql: ${{ fromJson(inputs.mysql) }}
+
+    services:
+      mysql:
+        image: mysql:${{ matrix.mysql }}
+        env:
+          MYSQL_DATABASE: humhub_test
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/setup-node@v1
+
+      - name: Checkout HumHub Core
+        uses: actions/checkout@v2
+        with:
+          repository: humhub/humhub
+          ref: v1.7
+
+      - name: Checkout Module
+        uses: actions/checkout@v2
+        with:
+          path: protected/modules/${{ env.module-id }}
+
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ${{ env.extensions }}
+          ini-values: date.timezone='UTC'
+
+      - name: Determine composer cache directory
+        if: matrix.os == 'ubuntu-latest'
+        run: echo "COMPOSER_CACHE_DIR=$(composer config cache-dir)" >> $GITHUB_ENV
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Cache dependencies installed with composer
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.COMPOSER_CACHE_DIR }}
+          key: php${{ matrix.php }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            php${{ matrix.php }}-composer-${{ matrix.dependencies }}-
+
+      - name: Install dependencies with composer
+        run: composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Build production assets
+        run: grunt build-assets
+
+      - name: Run migrations
+        run: php protected/humhub/tests/codeception/bin/yii migrate/up --includeModuleMigrations=1 --interactive=0
+
+      - name: Run installer
+        run: php protected/humhub/tests/codeception/bin/yii installer/auto
+
+      - name: Checkout REST Module
+        if: ${{ inputs.use-rest-module }}
+        uses: actions/checkout@v2
+        with:
+          repository: 'humhub/rest'
+          ref: 'master'
+          path: 'protected/modules/rest'
+
+      - name: Activate REST Module
+        if: ${{ inputs.use-rest-module }}
+        run: php protected/humhub/tests/codeception/bin/yii module/enable rest
+
+      - name: Rebuild search index
+        run: php protected/humhub/tests/codeception/bin/yii search/rebuild
+
+      - name: Build codeception core files
+        run: |
+          cd $GITHUB_WORKSPACE/protected/humhub/tests
+          php ../../vendor/bin/codecept build
+
+      - name: Run test server
+        run: |
+          # Temporary condition while branch "master" doesn't use pretty URLs on acceptance tests
+          if cat $GITHUB_WORKSPACE/.github/workflows/php-test.yml | grep -q ":8080 index-test.php"
+          then
+            php --server 127.0.0.1:8080 index-test.php &>/tmp/phpserver.log &
+          else
+            php --server 127.0.0.1:8080 &>/tmp/phpserver.log &
+          fi
+
+      - name: Setup chromedriver
+        run: chromedriver --url-base=/wd/hub &
+
+      - name: Valdiate test server
+        run: sleep 5 && curl --fail --head http://127.0.0.1:8080/index-test.php
+
+      - name: Install module dependencies
+        if: ${{ inputs.install-composer }}
+        run: |
+          cd $GITHUB_WORKSPACE/protected/modules/${{ env.module-id }}
+          composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
+
+      - name: Run test suite
+        run: |
+          export HUMHUB_PATH=$GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE/protected/modules/${{ env.module-id }}/tests
+          php $GITHUB_WORKSPACE/protected/vendor/bin/codecept build
+          php $GITHUB_WORKSPACE/protected/vendor/bin/codecept run --env github
