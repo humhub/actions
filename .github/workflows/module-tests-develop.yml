@@ -88,6 +88,8 @@ jobs:
         if: ${{ inputs.additional-module-id }}
         uses: actions/checkout@v2
         with:
+          repository: humhub/${{ inputs.additional-module-id }}
+          ref: master
           path: protected/modules/${{ inputs.additional-module-id }}
 
       - name: Install PHP with extensions
