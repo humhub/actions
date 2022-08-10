@@ -7,6 +7,9 @@ on:
         description: Module ID.
         required: true
         type: string
+      additional-module-id:
+        description: Additional Module ID.
+        type: string
       os:
         description: Os to test, separated by comma.
         default: >-
@@ -80,6 +83,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: protected/modules/${{ env.module-id }}
+
+      - name: Checkout Additional Module
+        if: ${{ inputs.additional-module-id }}
+        uses: actions/checkout@v2
+        with:
+          path: protected/modules/${{ inputs.additional-module-id }}
 
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
