@@ -22,7 +22,6 @@ on:
       MARKETPLACE_API_KEY:
         description: Marketplace API key
         required: false
-        type: string
 
 jobs:
   build:
