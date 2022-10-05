@@ -18,6 +18,11 @@ on:
         default: ${{ github.event.repository.name }}
         required: false
         type: string
+    secrets:
+      MARKETPLACE_API_KEY:
+        description: Marketplace API key
+        required: false
+        type: string
 
 jobs:
   build:
