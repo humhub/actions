@@ -47,3 +47,10 @@ jobs:
           -F "key=${{secrets.MARKETPLACE_API_KEY}}" \
           -F "ModuleVersionUpload[zipFile]=@${{ inputs.module-id }}.zip" \
           https://api.humhub.com/v1/marketplace/upload?moduleId=${{ inputs.module-id }}
+
+      - name: Upload Package to HumHub Marketplace (Integration)
+        run: |
+          curl --fail \
+          -F "key=${{secrets.MARKETPLACE_API_KEY_INT}}" \
+          -F "ModuleVersionUpload[zipFile]=@${{ inputs.module-id }}.zip" \
+          https://api.humhub.dev/v1/marketplace/upload?moduleId=${{ inputs.module-id }}
