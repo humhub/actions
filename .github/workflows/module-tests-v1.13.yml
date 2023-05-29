@@ -77,22 +77,22 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
 
       - name: Checkout HumHub Core
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: humhub/humhub
           ref: v1.13
 
       - name: Checkout Module
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: protected/modules/${{ env.module-id }}
 
       - name: Checkout Additional Module
         if: ${{ inputs.additional-module-id }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ inputs.additional-module-repo }}/${{ inputs.additional-module-id }}
           ref: ${{ inputs.additional-module-branch }}
@@ -113,7 +113,7 @@ jobs:
         run: composer validate
 
 #      - name: Cache dependencies installed with composer
-#        uses: actions/cache@v1
+#        uses: actions/cache@v3
 #        with:
 #          path: ${{ env.COMPOSER_CACHE_DIR }}
 #          key: php${{ matrix.php }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.json') }}
@@ -137,7 +137,7 @@ jobs:
 
       - name: Checkout REST Module
         if: ${{ inputs.use-rest-module }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: 'humhub/rest'
           ref: 'master'
