@@ -1,4 +1,4 @@
-name: module-tests-master
+name: module-tests-v1.14
 
 on:
   workflow_call:
@@ -15,7 +15,7 @@ on:
       php:
         description: PHP versions to test, separated by comma.
         default: >-
-          ['8.0', '8.1', '8.2']
+          ['7.4', '8.0', '8.1', '8.2']
         type: string
       extensions:
         description: List of extensions to PHP.
@@ -52,7 +52,7 @@ on:
 
 jobs:
   tests:
-    name: PHP ${{ matrix.php }}-mysql-${{ matrix.mysql }}-humhub-master
+    name: PHP ${{ matrix.php }}-mysql-${{ matrix.mysql }}-humhub-v1.14
     env:
       module-id: ${{ inputs.module-id }}
       extensions: ${{ inputs.extensions }}
@@ -87,7 +87,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: humhub/humhub
-          ref: master
+          ref: v1.14
 
       - name: Checkout Module
         uses: actions/checkout@v3
