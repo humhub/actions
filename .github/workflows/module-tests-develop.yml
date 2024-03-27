@@ -90,10 +90,10 @@ jobs:
       - name: Run Apache Solr
         if: ${{ inputs.run-solr }}
         run: |
-          docker run -d -p 127.0.0.1:8983:8983
-             --name humhub_solr \
-             -v $PWD/resources/solr:/humhubcore_config/conf \
-             solr:9 solr-precreate humhubcore /humhubcore_config
+          docker run --name humhub_solr \
+            -d -p 127.0.0.1:8983:8983 \
+            -v $PWD/resources/solr:/humhubcore_config/conf \
+            solr:9 solr-precreate humhubcore /humhubcore_config
 
       - name: Checkout HumHub Core
         uses: actions/checkout@v3
