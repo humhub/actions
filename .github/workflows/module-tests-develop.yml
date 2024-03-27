@@ -113,9 +113,6 @@ jobs:
             -d -p 127.0.0.1:8983:8983 \
             -v $PWD/resources/solr:/humhubcore_config/conf \
             solr:9 solr-precreate humhubcore /humhubcore_config
-          cd /var/solr/data/humhubcore/conf
-          cp $GITHUB_WORKSPACE/protected/modules/solr/resources/solr/schema.xml .
-          cp $GITHUB_WORKSPACE/protected/modules/solr/resources/solr/solrconfig.xml .
 
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
