@@ -87,14 +87,6 @@ jobs:
                 
       - uses: actions/setup-node@v3
 
-      - name: Run Apache Solr
-        if: ${{ inputs.run-solr }}
-        run: |
-          docker run --name humhub_solr \
-            -d -p 127.0.0.1:8983:8983 \
-            -v $PWD/resources/solr:/humhubcore_config/conf \
-            solr:9 solr-precreate humhubcore /humhubcore_config
-
       - name: Checkout HumHub Core
         uses: actions/checkout@v3
         with:
@@ -113,6 +105,14 @@ jobs:
           repository: ${{ inputs.additional-module-repo }}/${{ inputs.additional-module-id }}
           ref: ${{ inputs.additional-module-branch }}
           path: protected/modules/${{ inputs.additional-module-id }}
+
+      - name: Run Apache Solr
+        if: ${{ inputs.run-solr }}
+        run: |
+          docker run --name humhub_solr \
+            -d -p 127.0.0.1:8983:8983 \
+            -v $PWD/resources/solr:/humhubcore_config/conf \
+            solr:9 solr-precreate humhubcore /humhubcore_config
 
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
