@@ -147,9 +147,11 @@ jobs:
           ref: 'master'
           path: 'protected/modules/rest'
 
-      - name: Activate REST Module
-        if: ${{ inputs.use-rest-module }}
-        run: php protected/humhub/tests/codeception/bin/yii module/enable rest
+# This module should be activated on HumHubApiTestCest::_before()
+# Don't to do it here because it has a requirement to Pretty URLs
+#      - name: Activate REST Module
+#        if: ${{ inputs.use-rest-module }}
+#        run: php protected/humhub/tests/codeception/bin/yii module/enable rest
 
       - name: Rebuild search index
         run: php protected/humhub/tests/codeception/bin/yii search/rebuild
