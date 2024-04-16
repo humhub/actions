@@ -34,6 +34,10 @@ on:
         description: Install composer dependencies for the current module.
         default: false
         type: boolean
+      run-solr:
+        description: Run Apache Solr.
+        default: false
+        type: boolean
       additional-module-id:
         description: Additional Module ID.
         type: string
@@ -101,6 +105,14 @@ jobs:
           repository: ${{ inputs.additional-module-repo }}/${{ inputs.additional-module-id }}
           ref: ${{ inputs.additional-module-branch }}
           path: protected/modules/${{ inputs.additional-module-id }}
+
+      - name: Run Apache Solr
+        if: ${{ inputs.run-solr }}
+        run: |
+          docker run --name humhub_solr \
+            -d -p 127.0.0.1:8983:8983 \
+            -v ${GITHUB_WORKSPACE}/protected/modules/${{ env.module-id }}/resources/solr:/humhubcore_config/conf \
+            solr:9 solr-precreate humhubcore /humhubcore_config
 
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
@@ -170,7 +182,7 @@ jobs:
           else
             php --server 127.0.0.1:8080 &>/tmp/phpserver.log &
           fi
-          
+
       - name: Valdiate test server
         run: sleep 5 && curl --fail --head http://127.0.0.1:8080/index-test.php
 
@@ -192,7 +204,7 @@ jobs:
           cd $GITHUB_WORKSPACE/protected/modules/${{ env.module-id }}/tests
           php $GITHUB_WORKSPACE/protected/vendor/bin/codecept build
           php $GITHUB_WORKSPACE/protected/vendor/bin/codecept run --env github
-          
+
       - name: Upload Codeception Output
         if: failure()
         uses: actions/upload-artifact@v3
