@@ -77,6 +77,10 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
+      - name: Start Selenium
+        run: |
+          docker run --detach --net=host --shm-size="2g" selenium/standalone-chrome
+          
       - uses: actions/setup-node@v3
 
       - name: Checkout HumHub Core
@@ -112,16 +116,16 @@ jobs:
       - name: Validate composer.json and composer.lock
         run: composer validate
 
-#      - name: Cache dependencies installed with composer
-#        uses: actions/cache@v3
-#        with:
-#          path: ${{ env.COMPOSER_CACHE_DIR }}
-#          key: php${{ matrix.php }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.json') }}
-#          restore-keys: |
-#            php${{ matrix.php }}-composer-${{ matrix.dependencies }}-
+      - name: Cache dependencies installed with composer
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.COMPOSER_CACHE_DIR }}
+          key: php${{ matrix.php }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            php${{ matrix.php }}-composer-${{ matrix.dependencies }}-
 
       - name: Install dependencies with composer
-        run: composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
+        run: composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
       - name: Install npm dependencies
         run: npm install
@@ -143,9 +147,11 @@ jobs:
           ref: 'master'
           path: 'protected/modules/rest'
 
-      - name: Activate REST Module
-        if: ${{ inputs.use-rest-module }}
-        run: php protected/humhub/tests/codeception/bin/yii module/enable rest
+# This module should be activated on HumHubApiTestCest::_before()
+# Don't to do it here because it has a requirement to Pretty URLs
+#      - name: Activate REST Module
+#        if: ${{ inputs.use-rest-module }}
+#        run: php protected/humhub/tests/codeception/bin/yii module/enable rest
 
       - name: Rebuild search index
         run: php protected/humhub/tests/codeception/bin/yii search/rebuild
@@ -165,8 +171,8 @@ jobs:
             php --server 127.0.0.1:8080 &>/tmp/phpserver.log &
           fi
 
-      - name: Setup chromedriver
-        run: chromedriver --url-base=/wd/hub &
+#      - name: Setup chromedriver
+#        run: chromedriver --url-base=/wd/hub &
 
       - name: Valdiate test server
         run: sleep 5 && curl --fail --head http://127.0.0.1:8080/index-test.php
@@ -175,13 +181,13 @@ jobs:
         if: ${{ inputs.install-composer }}
         run: |
           cd $GITHUB_WORKSPACE/protected/modules/${{ env.module-id }}
-          composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
+          composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
       - name: Install module dependencies for the additional module
         if: ${{ inputs.additional-module-composer }}
         run: |
           cd $GITHUB_WORKSPACE/protected/modules/${{ inputs.additional-module-id }}
-          composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
+          composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
       - name: Run test suite
         run: |
