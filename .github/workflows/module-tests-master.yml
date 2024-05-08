@@ -38,6 +38,10 @@ on:
         description: Run Apache Solr.
         default: false
         type: boolean
+      run-clamav:
+        description: Run virus scanner ClamAV.
+        default: false
+        type: boolean
       additional-module-id:
         description: Additional Module ID.
         type: string
@@ -113,6 +117,13 @@ jobs:
             -d -p 127.0.0.1:8983:8983 \
             -v ${GITHUB_WORKSPACE}/protected/modules/${{ env.module-id }}/resources/solr:/humhubcore_config/conf \
             solr:9 solr-precreate humhubcore /humhubcore_config
+
+      - name: Run virus scanner ClamAV
+        if: ${{ inputs.run-clamav }}
+        run: |
+          docker run -d --name clamav \
+            -v ${GITHUB_WORKSPACE}/protected/modules/${{ env.module-id }}:/usr/local/share/clamav \
+            -p 3310:3310 clamav/clamav
 
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
