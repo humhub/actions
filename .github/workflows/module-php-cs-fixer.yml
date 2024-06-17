@@ -9,12 +9,11 @@ jobs:
       - name: Checkout Module
         uses: actions/checkout@v3
 
-      - name: Checkout HumHub Core
+      - name: Checkout PHP CS Fixer config
         uses: actions/checkout@v3
         with:
           path: phpcsfixer-config
-          repository: humhub/humhub
-          ref: develop
+          repository: humhub/actions
 
       - uses: actions/cache@v3
         with:
