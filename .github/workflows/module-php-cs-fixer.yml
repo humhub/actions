@@ -31,3 +31,4 @@ jobs:
         with:
           commit_message: Autocommit PHP CS Fixer
           status_options: '--untracked-files=no'
+          add_options: '--dry-run'
