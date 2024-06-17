@@ -6,7 +6,7 @@ $finder = (new PhpCsFixer\Finder())
         'views/',
         'phpcsfixer-config/',
     ])
-    ->in(__DIR__);
+    ->in(dirname(__DIR__));
 
 return (new PhpCsFixer\Config())
     ->setRules([
