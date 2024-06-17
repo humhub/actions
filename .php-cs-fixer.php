@@ -5,7 +5,8 @@ $finder = (new PhpCsFixer\Finder())
         'messages/',
         'views/',
         'phpcsfixer-config/',
-    ]);
+    ])
+    ->in(__DIR__);
 
 return (new PhpCsFixer\Config())
     ->setRules([
