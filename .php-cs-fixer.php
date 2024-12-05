@@ -14,6 +14,5 @@ return (new PhpCsFixer\Config())
         'phpdoc_scalar' => true,
         'cast_spaces' => false,
         'single_line_empty_body' => false,
-        'blank_line_after_opening_tag' => false,
     ])
     ->setFinder($finder);
