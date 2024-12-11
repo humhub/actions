@@ -89,22 +89,22 @@ jobs:
         run: |
           docker run --detach --net=host --shm-size="2g" selenium/standalone-chrome
           
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
 
       - name: Checkout HumHub Core
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: humhub/humhub
           ref: master
 
       - name: Checkout Module
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: protected/modules/${{ env.module-id }}
 
       - name: Checkout Additional Module
         if: ${{ inputs.additional-module-id }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ inputs.additional-module-repo }}/${{ inputs.additional-module-id }}
           ref: ${{ inputs.additional-module-branch }}
@@ -140,7 +140,7 @@ jobs:
         run: composer validate
 
       - name: Cache dependencies installed with composer
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.COMPOSER_CACHE_DIR }}
           key: php${{ matrix.php }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.json') }}
@@ -164,7 +164,7 @@ jobs:
 
       - name: Checkout REST Module
         if: ${{ inputs.use-rest-module }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: 'humhub/rest'
           ref: 'master'
@@ -218,7 +218,7 @@ jobs:
 
       - name: Upload Codeception Output
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: codeception-output
           path: protected/modules/${{ env.module-id }}/tests/codeception/_output/*

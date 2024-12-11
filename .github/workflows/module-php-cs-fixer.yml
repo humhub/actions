@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Module
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Check the commit message for skipping PHP-CS-Fixer
         id: check_phpcs_skip
@@ -23,12 +23,12 @@ jobs:
 
       - name: Checkout PHP CS Fixer config
         if: steps.check_phpcs_skip.outputs.skip == 'false'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: phpcsfixer-config
           repository: humhub/actions
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         if: steps.check_phpcs_skip.outputs.skip == 'false'
         with:
           path: phpcsfixer-config/.php-cs-fixer.cache
