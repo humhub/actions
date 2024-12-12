@@ -62,3 +62,5 @@ jobs:
           title: "PHP CS Fixer ${{ env.PHP_FIXER_DATETIME }}"
           body: "This Pull Request includes automated changes from PHP-CS-Fixer."
           base: ${{ github.ref_name }}
+          add-paths: |
+            **/*.php
