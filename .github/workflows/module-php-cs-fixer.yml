@@ -42,10 +42,23 @@ jobs:
         with:
           args: --config=phpcsfixer-config/.php-cs-fixer.php
 
-      - name: Auto commit changes
+      - name: Commit changes to a new branch
         if: steps.check_phpcs_skip.outputs.skip == 'false'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          PHP_FIXER_DATETIME=$(date +%Y-%m-%d-%H%M%S)
+          echo "PHP_FIXER_DATETIME=$PHP_FIXER_DATETIME" >> $GITHUB_ENV
+          git checkout -b "php-fixer/$PHP_FIXER_DATETIME"
+          git add -u
+          git commit -m "Autocommit PHP CS Fixer"
+          git push origin "php-fixer/$PHP_FIXER_DATETIME"
+
+      - name: Create Pull Request
+        if: steps.check_phpcs_skip.outputs.skip == 'false'
+        uses: peter-evans/create-pull-request@v7
         with:
-          commit_message: Autocommit PHP CS Fixer
-          status_options: '--untracked-files=no'
-          add_options: '-u'
+          branch: "php-fixer/${{ env.PHP_FIXER_DATETIME }}"
+          title: "PHP CS Fixer ${{ env.PHP_FIXER_DATETIME }}"
+          body: "This Pull Request includes automated changes from PHP-CS-Fixer."
+          base: ${{ github.ref_name }}
