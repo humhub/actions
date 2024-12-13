@@ -57,3 +57,5 @@ jobs:
             --body "This Pull Request includes automated changes from PHP-CS-Fixer." \
             --base "${{ github.ref_name }}" \
             --head "php-fixer/$PHP_FIXER_DATETIME"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
