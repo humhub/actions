@@ -10,6 +10,17 @@ jobs:
       - name: Checkout Module
         uses: actions/checkout@v4
 
+      - name: Check if branch is allowed
+        id: branch_check
+        run: |
+          ALLOWED_BRANCHES=("master" "main" "develop")
+          CURRENT_BRANCH="${GITHUB_REF_NAME}"
+          if [[ ! " ${ALLOWED_BRANCHES[@]} " =~ " ${CURRENT_BRANCH} " ]]; then
+            echo "This workflow runs only for master, main, and develop branches."
+            exit 1
+          fi
+        shell: bash
+
       - name: Check the commit message for skipping PHP-CS-Fixer
         id: check_phpcs_skip
         run: |
