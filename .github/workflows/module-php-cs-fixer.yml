@@ -17,7 +17,7 @@ jobs:
           CURRENT_BRANCH="${GITHUB_REF_NAME}"
           if [[ ! " ${ALLOWED_BRANCHES[@]} " =~ " ${CURRENT_BRANCH} " ]]; then
             echo "This workflow runs only for master, main, and develop branches."
-            exit 1
+            exit 0
           fi
         shell: bash
 
