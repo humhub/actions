@@ -177,7 +177,7 @@ jobs:
 #        run: php protected/humhub/tests/codeception/bin/yii module/enable rest
 
       - name: Rebuild search index
-        run: php protected/humhub/tests/codeception/bin/yii search/rebuild
+        run: php protected/humhub/tests/codeception/bin/yii content-search/rebuild
 
       - name: Build codeception core files
         run: |
