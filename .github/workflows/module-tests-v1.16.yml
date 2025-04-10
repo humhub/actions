@@ -197,7 +197,5 @@ jobs:
         with:
           name: codeception-output
           path: |
-            protected/humhub/tests/codeception/_output/*
-            protected/humhub/modules/*/tests/codeception/_output/*
             protected/modules/*/tests/codeception/_output/*
             protected/runtime/logs/*
