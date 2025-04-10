@@ -196,4 +196,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: codeception-output
-          path: protected/modules/${{ env.module-id }}/tests/codeception/_output/*
+          path: |
+            protected/humhub/tests/codeception/_output/*
+            protected/humhub/modules/*/tests/codeception/_output/*
+            protected/modules/*/tests/codeception/_output/*
+            protected/runtime/logs/*
