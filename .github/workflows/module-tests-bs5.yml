@@ -95,7 +95,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: humhub/humhub
-          ref: fix/bs5-tests
+          ref: bs5
 
       - name: Checkout Module
         uses: actions/checkout@v4
