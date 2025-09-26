@@ -71,17 +71,36 @@ jobs:
           min=$(jq -r '.humhub.minVersion' protected/modules/${{ inputs.module-id }}/module.json)
           echo "minVersion=$min" >> $GITHUB_OUTPUT
           echo "ℹ️ Module requires HumHub minVersion: $min"
+    
 
       - name: Get latest HumHub patch tag
+        # Example
+        # minVersion: "1.18"
+        # → find v1.18.0, v1.18.1, v1.18.2
+        # → choose v1.18.2
+        #
+        # minVersion: "1.18.0"
+        # → find v1.18.0, v1.18.0-beta.1, v1.18.0-beta.2
+        # → choose v1.18.0
+        #
+        # minVersion: "1.18.0-beta"
+        # → find v1.18.0-beta.1, v1.18.0-beta.2
+        # → choose v1.18.0-beta.2.
         id: get-tag
         run: |
           git clone --quiet --filter=blob:none --tags https://github.com/humhub/humhub.git humhub-core
           cd humhub-core
           base="${{ steps.get-min.outputs.minVersion }}"
-          latest=$(git tag -l "${base}.*" | sort -V | tail -n1)
-          if [ -z "$latest" ]; then
-            latest=$base
+          
+          # Search with "v" Prefix
+          tags=$(git tag -l "v${base}*")
+          if [ -n "$tags" ]; then
+            latest=$(echo "$tags" | sort -V | tail -n1)
+          else
+            echo "❌ No tag found for base ${base}"
+            exit 1
           fi
+          
           echo "Found latest patch tag: $latest"
           echo "humhub-tag=$latest" >> $GITHUB_OUTPUT
 
