@@ -107,31 +107,53 @@ jobs:
           MAX="${{ steps.module.outputs.max }}"
           
           echo "---------------------------------------------------"
-          echo "🔎 Checking HumHub compatibility"
+          echo " Checking HumHub compatibility (raw values)"
           echo "   - HumHub branch  : $BRANCH"
           echo "   - HumHub version : $HUMHUB"
           echo "   - Module min     : $MIN"
-          if [ -n "$MAX" ]; then
-            echo "   - Module max     : $MAX"
-          else
-            echo "   - Module max     : (not set, no upper limit)"
+          echo "   - Module max     : ${MAX:-∞}"
+          echo "---------------------------------------------------"
+          
+          # Strip leading "v"
+          HUMHUB="${HUMHUB#v}"
+          
+          # Remove "-master" / "-develop" suffixes (nur für Dev-Builds)
+          if [[ "$HUMHUB" =~ -master$ ]] || [[ "$HUMHUB" =~ -develop$ ]]; then
+            HUMHUB=$(echo "$HUMHUB" | sed -E 's/-(master|develop)$//')
           fi
+          
+          # Add Patch-Level if only major.minor
+          if [[ "$MIN" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            MIN="${MIN}.0"
+          fi
+          if [[ "$MAX" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            MAX="${MAX}.0"
+          fi
+          
+          echo " Normalized values:"
+          echo "   - HumHub version : $HUMHUB"
+          echo "   - Module min     : $MIN"
+          echo "   - Module max     : ${MAX:-∞}"
           echo "---------------------------------------------------"
           
           skip=false
           reason=""
           
-          # Prüfe minVersion
+          # Check minVersion
           if dpkg --compare-versions "$HUMHUB" lt "$MIN"; then
             skip=true
             reason="HumHub $HUMHUB is lower than required minVersion $MIN"
+          else
+            echo "Comparison result: $HUMHUB >= $MIN"
           fi
           
-          # Prüfe maxVersion nur wenn gesetzt
+          # Check maxVersion if set
           if [ -n "$MAX" ]; then
             if dpkg --compare-versions "$HUMHUB" gt "$MAX"; then
               skip=true
               reason="HumHub $HUMHUB is higher than allowed maxVersion $MAX"
+            else
+              echo "Comparison result: $HUMHUB <= $MAX"
             fi
           fi
           
