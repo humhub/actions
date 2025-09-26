@@ -115,6 +115,7 @@ jobs:
 
   call-base:
     uses: ./.github/workflows/module-tests-base.yml
+    needs: determine-min-version
     with:
       module-id: ${{ inputs.module-id }}
       humhub-branch: ${{ needs.determine-min-version.outputs.humhub-tag }}
