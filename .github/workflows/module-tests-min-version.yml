@@ -1,26 +1,16 @@
-name: module-tests-develop-new
+name: module-tests-min-version
 
 on:
   workflow_call:
     inputs:
-      module-id:
-        description: Module ID.
-        required: true
-        type: string
-      humhub-branch:
-        description: Test against HumHub Branch.
-        required: false
-        default: develop
-        type: string
       os:
         description: Os to test, separated by comma.
         default: >-
           ['ubuntu-latest']
         type: string
-      php:
-        description: PHP versions to test, separated by comma.
-        default: >-
-          ['8.2', '8.3', '8.4']
+      module-id:
+        description: Module ID.
+        required: true
         type: string
       extensions:
         description: List of extensions to PHP.
@@ -64,12 +54,52 @@ on:
         type: boolean
 
 jobs:
+  determine-min-version:
+    runs-on: ubuntu-latest
+    outputs:
+      humhub-tag: ${{ steps.get-tag.outputs.humhub-tag }}
+      php-version: ${{ steps.get-php.outputs.php-version }}
+    steps:
+      - name: Checkout Module
+        uses: actions/checkout@v4
+        with:
+          path: protected/modules/${{ inputs.module-id }}
+
+      - name: Read minVersion from module.json
+        id: get-min
+        run: |
+          min=$(jq -r '.humhub.minVersion' protected/modules/${{ inputs.module-id }}/module.json)
+          echo "minVersion=$min" >> $GITHUB_OUTPUT
+          echo "ℹ️ Module requires HumHub minVersion: $min"
+
+      - name: Get latest HumHub patch tag
+        id: get-tag
+        run: |
+          git clone --quiet --filter=blob:none --tags https://github.com/humhub/humhub.git humhub-core
+          cd humhub-core
+          base="${{ steps.get-min.outputs.minVersion }}"
+          latest=$(git tag -l "${base}.*" | sort -V | tail -n1)
+          if [ -z "$latest" ]; then
+            latest=$base
+          fi
+          echo "Found latest patch tag: $latest"
+          echo "humhub-tag=$latest" >> $GITHUB_OUTPUT
+
+      - name: Read minRecommendedPhpVersion
+        id: get-php
+        run: |
+          cd humhub-core
+          git checkout ${{ steps.get-tag.outputs.humhub-tag }}
+          phpmin=$(grep -oP "'minRecommendedPhpVersion'\s*=>\s*'[^']+'" protected/humhub/config/common.php | sed -E "s/.*'([^']+)'.*/\1/")
+          echo "Minimum recommended PHP: $phpmin"
+          echo "php-version=[\"$phpmin\"]" >> $GITHUB_OUTPUT
+
   call-base:
     uses: ./.github/workflows/module-tests-base.yml
     with:
       module-id: ${{ inputs.module-id }}
-      humhub-branch: develop
-      php: "['8.2','8.3','8.4']"
+      humhub-branch: ${{ inputs.humhub-branch }}
+      php: ${{ inputs.php }}
       extensions: ${{ inputs.extensions }}
       mysql: ${{ inputs.mysql }}
       use-rest-module: ${{ inputs.use-rest-module }}
