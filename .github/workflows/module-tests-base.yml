@@ -126,8 +126,10 @@ jobs:
           if [[ "$MIN" =~ ^[0-9]+\.[0-9]+$ ]]; then
             MIN="${MIN}.0"
           fi
+          
+          # Normalize MAX (x.y.999)
           if [[ "$MAX" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            MAX="${MAX}.0"
+            MAX="${MAX}.999"
           fi
           
           echo " Normalized values:"
