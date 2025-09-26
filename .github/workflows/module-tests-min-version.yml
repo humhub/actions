@@ -117,8 +117,8 @@ jobs:
     uses: ./.github/workflows/module-tests-base.yml
     with:
       module-id: ${{ inputs.module-id }}
-      humhub-branch: ${{ inputs.humhub-tag }}
-      php: ${{ inputs.php }}
+      humhub-branch: ${{ needs.determine-min-version.outputs.humhub-tag }}
+      php: ${{ needs.determine-min-version.outputs.php-version }}
       extensions: ${{ inputs.extensions }}
       mysql: ${{ inputs.mysql }}
       use-rest-module: ${{ inputs.use-rest-module }}
